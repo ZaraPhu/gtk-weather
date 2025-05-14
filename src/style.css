@@ -1,3 +1,24 @@
-.inside-text {
-    color: magenta;
+.title-small {
+    font-size: 1rem;
+    margin: 1rem;
+}
+
+.title-medium {
+    font-size: 2rem;
+    margin: 1rem;
+}
+
+.title-large {
+    font-size: 3rem;
+    margin: 1rem;
+}
+
+.title-xlarge {
+    font-size: 4rem;
+    margin: 1rem;
+}
+
+.blue-theme {
+    background-color: lightblue;
+    color: black;
 }

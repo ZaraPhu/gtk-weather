@@ -1,7 +1,7 @@
 # gtk-weather
 
 ## Build Instructions
-To build this app from source, you will require the `cmake` and `make` CLI utilities, and GTK 4.0 library installed on your system.
+To build this app from source, you will require the `cmake` and `make` CLI utilities + the GTK4 library and libcurl installed on your system.
 
 Clone this repository to your local machine by opening up a shell session and executing the command
 ```sh
