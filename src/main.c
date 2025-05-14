@@ -1,3 +1,4 @@
+#include <glib-object.h>
 #include <gtk/gtk.h>
 #include <curl/curl.h>
 #include <math.h>
@@ -11,14 +12,6 @@
 
 static void request_weather_data(CURL *handler) {
     curl_easy_setopt(handler, CURLOPT_HTTPGET, "https://www.google.com");
-}
-
-static void load_css() {
-    GtkCssProvider *provider = gtk_css_provider_new();
-    GdkDisplay *display = gdk_display_get_default();
-    GFile *css_file = g_file_new_for_path(CSS_FILE);
-    gtk_css_provider_load_from_file(provider, css_file);
-    gtk_style_context_add_provider_for_display(display, GTK_STYLE_PROVIDER(provider), 1);
 }
 
 static void on_activate(GtkApplication *app, gpointer user_data) {
@@ -48,7 +41,7 @@ int main(int argc, char **args) {
     load_dotenv("../.env");
     fprintf(stdout, "%s\n", getenv("TEST_VAR"));
     GtkApplication *app = gtk_application_new("com.example.gtk-weather", G_APPLICATION_DEFAULT_FLAGS);
-    g_signal_connect(app, "startup", G_CALLBACK(load_css), NULL);
+    g_signal_connect_swapped(app, "startup", G_CALLBACK(load_css), CSS_FILE);
     g_signal_connect(app, "activate", G_CALLBACK(on_activate), NULL);
     int status = g_application_run(G_APPLICATION(app), argc, args);
     g_object_unref(app);

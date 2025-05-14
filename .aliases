@@ -1,0 +1,1 @@
+alias rmake="cmake .. && make && ./gtk_weather"
