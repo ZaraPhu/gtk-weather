@@ -1,9 +1,10 @@
-#include <glib-object.h>
 #include <gtk/gtk.h>
 #include <curl/curl.h>
 #include <math.h>
 #include "utils.h"
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define CSS_FILE "style.css"
 #define WINDOW_WIDTH 1200
@@ -38,12 +39,13 @@ static void on_activate(GtkApplication *app, gpointer user_data) {
 }
 
 int main(int argc, char **args) {
-    load_dotenv("../.env");
-    fprintf(stdout, "%s\n", getenv("TEST_VAR"));
+    int status;
+    if(load_dotenv("../.env") == EXIT_FAILURE) { return EXIT_FAILURE; }
     GtkApplication *app = gtk_application_new("com.example.gtk-weather", G_APPLICATION_DEFAULT_FLAGS);
+    if (app == NULL) { fprintf(stderr, "Could not start Gtk application.\n"); return EXIT_FAILURE; }
     g_signal_connect_swapped(app, "startup", G_CALLBACK(load_css), CSS_FILE);
     g_signal_connect(app, "activate", G_CALLBACK(on_activate), NULL);
-    int status = g_application_run(G_APPLICATION(app), argc, args);
+    status = g_application_run(G_APPLICATION(app), argc, args);
     g_object_unref(app);
     return status;
 }

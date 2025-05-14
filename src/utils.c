@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <gtk/gtk.h>
+#include <errno.h>
+#include <string.h>
 
 #define LINE_BUF_SIZE 256
 
@@ -10,7 +12,7 @@ int load_dotenv(char *file_path) {
     char line_buf[LINE_BUF_SIZE];
     FILE *file_ptr = fopen(file_path, "r");
     if (file_ptr == NULL) {
-        fprintf(stderr, "Could not find the .env file\n");
+        fprintf(stderr, "Could not load environment file. %s '%s'.\n", strerror(errno), file_path);
         return EXIT_FAILURE;
     }
 
@@ -27,7 +29,7 @@ int load_dotenv(char *file_path) {
             i++;
         }
         if (setenv(line_buf, line_buf + (i * sizeof(char)), 1) == -1) {
-            fprintf(stderr, "There was an error parsing the .env file at line %d.\n", line_number);
+            fprintf(stderr, "There was an error parsing the .env file on line %d.\n%s.\n", line_number, strerror(errno));
             fclose(file_ptr);
             return EXIT_FAILURE;
         }
