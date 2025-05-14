@@ -6,6 +6,7 @@ pkg_check_modules(GTK4 REQUIRED IMPORTED_TARGET gtk4)
 
 add_executable(gtk_weather src/main.c)
 set_target_properties(gtk_weather PROPERTIES CXX_STANDARD 23)
+
 target_link_libraries(gtk_weather PRIVATE PkgConfig::GTK4)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
