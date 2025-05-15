@@ -1,3 +1,11 @@
+/*
+The purpose of this file is to store the main function which manages the GtkApplication
+for the GTK Weather app.
+Author: Zara Phukan.
+Creation Date: May 14, 2025.
+*/
+
+/*** Dependencies ***/
 #include <gtk/gtk.h>
 #include <curl/curl.h>
 #include <math.h>
@@ -6,11 +14,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+/*** Macro Definitions ***/
 #define CSS_FILE "style.css"
 #define WINDOW_WIDTH 1200
 #define WINDOW_HEIGHT 1200
 #define DIAGONAL sqrt(pow(WINDOW_HEIGHT, 2) + pow(WINDOW_HEIGHT, 2))
 
+/*** Static Functions ***/
 static void on_activate(GtkApplication *app, gpointer user_data) {
     GtkWidget *window = gtk_application_window_new(app);
     gtk_window_set_title(GTK_WINDOW(window), "GTK Weather");
@@ -34,6 +44,7 @@ static void on_activate(GtkApplication *app, gpointer user_data) {
     gtk_window_present(GTK_WINDOW(window));
 }
 
+/*** Main Function ***/
 int main(int argc, char **args) {
     if (load_dotenv("../.env") == EXIT_FAILURE) { return EXIT_FAILURE; }
     const char *accuweather_api_key = getenv("ACCUWEATHER_API_KEY");
@@ -48,5 +59,6 @@ int main(int argc, char **args) {
     int status = g_application_run(G_APPLICATION(app), argc, args);
 
     g_object_unref(app);
+    curl_easy_cleanup(curl_handle);
     return status;
 }

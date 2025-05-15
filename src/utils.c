@@ -1,4 +1,13 @@
+/*
+The purpose of this file is to store the functions used in the main executable
+program code for the GTK Weather app.
+Author: Zara Phukan.
+Creation Date: May 14, 2025.
+*/
+
+/*** Dependencies ***/
 #include "utils.h"
+#include <curl/easy.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,15 +16,20 @@
 #include <string.h>
 #include <curl/curl.h>
 
+/*** Macro Definitions ***/
 #define LINE_BUF_SIZE 256
 #define RESPONSE_BUF_SIZE 1024
 
-static struct curl_slist* generate_headers(
+/*** Global Variables/Constants ***/
+static char *ACCUWEATHER_FORECAST_API = "developer.accuweather.com/accuweather-forecast-api/apis/get";
+static char *curl_err_buf[CURL_ERROR_SIZE];
 
-) {
-    return NULL;
+/*** Static Functions ***/
+static char *create_request_url() {
+    return strcat(ACCUWEATHER_FORECAST_API, "/forecasts/v1/daily/1day/49538?apikey=dnSMVc7YVaMK3qx9VQXH98w1ARJWAwn1&language=en-us&details=false&metric=false");
 }
 
+/*** Exported Functions ***/
 int load_dotenv(char *file_path) {
     char line_buf[LINE_BUF_SIZE];
     FILE *file_ptr = fopen(file_path, "r");
@@ -73,11 +87,10 @@ int request_weather_data(
     char *location_key,
     char *api_key
 ) {
-    struct curl_slist *headers = generate_headers(
-
-    );
-    curl_easy_setopt(handle, CURLOPT_HTTPHEADER, headers);
-    curl_easy_setopt(handle, CURLOPT_HTTPGET, "https://www.google.com");
-    curl_slist_free_all(headers);
+    char *full_url = create_request_url();
+    curl_easy_setopt(handle, CURLOPT_HTTPGET, full_url);
+    curl_easy_setopt(handle, CURLOPT_ERRORBUFFER, curl_err_buf);
+    CURLcode status = curl_easy_perform(handle);
+    if (status) { fprintf(stderr, "libcurl: %s\n", curl_easy_strerror(status)); return EXIT_FAILURE; }
     return EXIT_SUCCESS;
 }

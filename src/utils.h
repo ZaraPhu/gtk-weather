@@ -1,3 +1,10 @@
+/*
+The purpose of this file is to serve as a header file to export functions
+from the utils.c code to the main.c code.
+Author: Zara Phukan.
+Creation Date: May 14, 2025.
+*/
+
 #include <curl/curl.h>
 #include <stddef.h>
 
