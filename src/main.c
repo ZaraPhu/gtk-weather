@@ -20,6 +20,9 @@ Creation Date: May 14, 2025.
 #define WINDOW_HEIGHT 1200
 #define DIAGONAL sqrt(pow(WINDOW_HEIGHT, 2) + pow(WINDOW_HEIGHT, 2))
 
+/*** Global Variables/Constants ***/
+int status;
+
 /*** Static Functions ***/
 static void on_activate(GtkApplication *app, gpointer user_data) {
     GtkWidget *window = gtk_application_window_new(app);
@@ -51,12 +54,13 @@ int main(int argc, char **args) {
     if (accuweather_api_key == NULL) { fprintf(stderr, "Could not load AccuWeather API key"); }
 
     CURL *curl_handle = curl_easy_init();
+    status = request_weather_data(curl_handle, "", "");
 
     GtkApplication *app = gtk_application_new("com.example.gtk-weather", G_APPLICATION_DEFAULT_FLAGS);
     if (app == NULL) { fprintf(stderr, "Could not start Gtk application.\n"); return EXIT_FAILURE; }
     g_signal_connect_swapped(app, "startup", G_CALLBACK(load_css), CSS_FILE);
     g_signal_connect(app, "activate", G_CALLBACK(on_activate), NULL);
-    int status = g_application_run(G_APPLICATION(app), argc, args);
+    status = g_application_run(G_APPLICATION(app), argc, args);
 
     g_object_unref(app);
     curl_easy_cleanup(curl_handle);

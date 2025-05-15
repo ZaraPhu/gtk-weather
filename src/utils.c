@@ -87,8 +87,8 @@ int request_weather_data(
     char *location_key,
     char *api_key
 ) {
-    char *full_url = create_request_url();
-    curl_easy_setopt(handle, CURLOPT_HTTPGET, full_url);
+    char *full_url = "http://dataservice.accuweather.com/forecasts/v1/daily/1day/49538?apikey=dnSMVc7YVaMK3qx9VQXH98w1ARJWAwn1&language=en-us&details=false&metric=false";
+    curl_easy_setopt(handle, CURLOPT_URL, full_url);
     curl_easy_setopt(handle, CURLOPT_ERRORBUFFER, curl_err_buf);
     CURLcode status = curl_easy_perform(handle);
     if (status) { fprintf(stderr, "libcurl: %s\n", curl_easy_strerror(status)); return EXIT_FAILURE; }
