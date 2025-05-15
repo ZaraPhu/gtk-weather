@@ -11,10 +11,6 @@
 #define WINDOW_HEIGHT 1200
 #define DIAGONAL sqrt(pow(WINDOW_HEIGHT, 2) + pow(WINDOW_HEIGHT, 2))
 
-static void request_weather_data(CURL *handler) {
-    curl_easy_setopt(handler, CURLOPT_HTTPGET, "https://www.google.com");
-}
-
 static void on_activate(GtkApplication *app, gpointer user_data) {
     GtkWidget *window = gtk_application_window_new(app);
     gtk_window_set_title(GTK_WINDOW(window), "GTK Weather");
@@ -39,13 +35,18 @@ static void on_activate(GtkApplication *app, gpointer user_data) {
 }
 
 int main(int argc, char **args) {
-    int status;
-    if(load_dotenv("../.env") == EXIT_FAILURE) { return EXIT_FAILURE; }
+    if (load_dotenv("../.env") == EXIT_FAILURE) { return EXIT_FAILURE; }
+    const char *accuweather_api_key = getenv("ACCUWEATHER_API_KEY");
+    if (accuweather_api_key == NULL) { fprintf(stderr, "Could not load AccuWeather API key"); }
+
+    CURL *curl_handle = curl_easy_init();
+
     GtkApplication *app = gtk_application_new("com.example.gtk-weather", G_APPLICATION_DEFAULT_FLAGS);
     if (app == NULL) { fprintf(stderr, "Could not start Gtk application.\n"); return EXIT_FAILURE; }
     g_signal_connect_swapped(app, "startup", G_CALLBACK(load_css), CSS_FILE);
     g_signal_connect(app, "activate", G_CALLBACK(on_activate), NULL);
-    status = g_application_run(G_APPLICATION(app), argc, args);
+    int status = g_application_run(G_APPLICATION(app), argc, args);
+
     g_object_unref(app);
     return status;
 }
