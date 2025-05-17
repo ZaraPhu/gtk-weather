@@ -76,7 +76,7 @@ static char *create_request_url(
 ) {
     char *full_url = (char *) malloc(STR_LEN_MAX);
     my_concat(full_url, ACCUWEATHER_FORECAST_API);
-    char frequency_str[12]; 
+    char frequency_str[17]; 
     switch (frequency) {
         case ONE_HOUR: { my_concat(full_url, "/hourly/1hour/"); break; }
         case TWELVE_HOURS: { my_concat(full_url, "/hourly/12hour/"); break; }
