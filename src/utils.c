@@ -19,15 +19,54 @@ Creation Date: May 14, 2025.
 /*** Macro Definitions ***/
 #define LINE_BUF_SIZE 256
 #define RESPONSE_BUF_SIZE 1024
+#define URL_BUF_SIZE 1024
+#define STR_LEN_MAX 512
 
 /*** Global Variables/Constants ***/
-static char *ACCUWEATHER_FORECAST_API = "developer.accuweather.com/accuweather-forecast-api/apis/get";
+static char *ACCUWEATHER_FORECAST_API = "http://dataservice.accuweather.com/forecasts/v1";
 static char *curl_err_buf[CURL_ERROR_SIZE];
 
 /*** Static Functions ***/
-static char *create_request_url() {
-    return strcat(ACCUWEATHER_FORECAST_API, "/forecasts/v1/daily/1day/49538?apikey=dnSMVc7YVaMK3qx9VQXH98w1ARJWAwn1&language=en-us&details=false&metric=false");
+static void my_concat(char *base, const char *add) {
+    /**
+     * Concatenates a string to the end of another string.
+     *
+     * This function appends the contents of 'add' to the end of 'base'.
+     * It first finds the end of the 'base' string by locating its null terminator,
+     * then copies characters from 'add' to that position in 'base'.
+     * The function ensures that the resulting string does not exceed STR_LEN_MAX
+     * characters, including the null terminator.
+     *
+     * @param base Pointer to the destination string buffer
+     * @param add Pointer to the null-terminated source string to be appended
+     *
+     * @note The 'base' buffer must be large enough to contain both strings
+     *       and must be null-terminated before calling this function.
+     */
+    int i = 0;
+    while (i < STR_LEN_MAX) {
+        if (base[i] == '\0') { break; }
+        i++;
+    }
+    int k = 0;
+    while (k + i < STR_LEN_MAX) {
+        base[k + i] = add[k];
+        if (add[k] == '\0') { break; }
+        k++;
+    }
 }
+
+static char *create_request_url(char *location_key, char *api_key) {
+    char *full_url = (char *) malloc(STR_LEN_MAX);
+    my_concat(full_url, ACCUWEATHER_FORECAST_API);
+    my_concat(full_url, "/daily/1day/");
+    my_concat(full_url, location_key);
+    my_concat(full_url, "?apikey=");
+    my_concat(full_url, api_key);
+    my_concat(full_url, "%20&language=en-us&details=false&metric=false");
+    return full_url;
+}
+
 
 /*** Exported Functions ***/
 int load_dotenv(char *file_path) {
@@ -45,7 +84,7 @@ int load_dotenv(char *file_path) {
         while (true) {
             if (line_buf[i] == '=') {
                 line_buf[i] = '\0';
-                i = (i + 2) % LINE_BUF_SIZE;
+                i = (i + 1) % LINE_BUF_SIZE;
                 break;
             }
             if (i == (LINE_BUF_SIZE - 1)) {
@@ -87,10 +126,11 @@ int request_weather_data(
     char *location_key,
     char *api_key
 ) {
-    char *full_url = "http://dataservice.accuweather.com/forecasts/v1/daily/1day/49538?apikey=dnSMVc7YVaMK3qx9VQXH98w1ARJWAwn1&language=en-us&details=false&metric=false";
+    char *full_url = create_request_url(location_key, api_key);
     curl_easy_setopt(handle, CURLOPT_URL, full_url);
     curl_easy_setopt(handle, CURLOPT_ERRORBUFFER, curl_err_buf);
     CURLcode status = curl_easy_perform(handle);
+    free(full_url);
     if (status) { fprintf(stderr, "libcurl: %s\n", curl_easy_strerror(status)); return EXIT_FAILURE; }
     return EXIT_SUCCESS;
 }

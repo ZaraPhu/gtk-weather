@@ -50,11 +50,11 @@ static void on_activate(GtkApplication *app, gpointer user_data) {
 /*** Main Function ***/
 int main(int argc, char **args) {
     if (load_dotenv("../.env") == EXIT_FAILURE) { return EXIT_FAILURE; }
-    const char *accuweather_api_key = getenv("ACCUWEATHER_API_KEY");
+    char *accuweather_api_key = getenv("ACCUWEATHER_API_KEY");
     if (accuweather_api_key == NULL) { fprintf(stderr, "Could not load AccuWeather API key"); }
 
     CURL *curl_handle = curl_easy_init();
-    status = request_weather_data(curl_handle, "", "");
+    status = request_weather_data(curl_handle, "49538", accuweather_api_key);
 
     GtkApplication *app = gtk_application_new("com.example.gtk-weather", G_APPLICATION_DEFAULT_FLAGS);
     if (app == NULL) { fprintf(stderr, "Could not start Gtk application.\n"); return EXIT_FAILURE; }
