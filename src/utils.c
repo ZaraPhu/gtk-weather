@@ -26,6 +26,19 @@ Creation Date: May 14, 2025.
 static char *ACCUWEATHER_FORECAST_API = "http://dataservice.accuweather.com/forecasts/v1";
 static char *curl_err_buf[CURL_ERROR_SIZE];
 
+/*** Enums/Structs Definition ***/
+enum ForecastFrequency {
+    ONE_HOUR,
+    TWELVE_HOURS,
+    TWENTY_FOUR_HOURS,
+    SEVENTY_TWO_HOURS,
+    ONE_TWENTY_HOURS,
+    ONE_DAY,
+    FIVE_DAYS,
+    TEN_DAYS,
+    FIFTEEN_DAYS,
+};
+
 /*** Static Functions ***/
 static void my_concat(char *base, const char *add) {
     /**
@@ -56,10 +69,26 @@ static void my_concat(char *base, const char *add) {
     }
 }
 
-static char *create_request_url(char *location_key, char *api_key) {
+static char *create_request_url(
+    char *location_key, 
+    char *api_key,
+    enum ForecastFrequency frequency
+) {
     char *full_url = (char *) malloc(STR_LEN_MAX);
     my_concat(full_url, ACCUWEATHER_FORECAST_API);
-    my_concat(full_url, "/daily/1day/");
+    char frequency_str[12]; 
+    switch (frequency) {
+        case ONE_HOUR: { my_concat(full_url, "/hourly/1hour/"); break; }
+        case TWELVE_HOURS: { my_concat(full_url, "/hourly/12hour/"); break; }
+        case TWENTY_FOUR_HOURS: { my_concat(full_url, "/hourly/24hour/"); break; }
+        case SEVENTY_TWO_HOURS: { my_concat(full_url, "/hourly/72hour/"); break; }
+        case ONE_TWENTY_HOURS: { my_concat(full_url, "/hourly/120hour/"); break; }
+        case ONE_DAY: { my_concat(full_url, "/daily/1day/"); break; }
+        case FIVE_DAYS: { my_concat(full_url, "/daily/5day/"); break; }
+        case TEN_DAYS: { my_concat(full_url, "/daily/10day/"); break; }
+        case FIFTEEN_DAYS: { my_concat(full_url, "/daily/15day/"); break; }
+        default: return "INVALID";
+    }
     my_concat(full_url, location_key);
     my_concat(full_url, "?apikey=");
     my_concat(full_url, api_key);
@@ -70,6 +99,21 @@ static char *create_request_url(char *location_key, char *api_key) {
 
 /*** Exported Functions ***/
 int load_dotenv(char *file_path) {
+    /**
+     * Loads environment variables from a file.
+     *
+     * This function reads a file containing environment variable definitions in the format
+     * KEY=VALUE (one per line) and sets them in the current process environment.
+     * Each line is parsed to separate the variable name from its value at the '=' character.
+     * 
+     * @param file_path Path to the environment file to be loaded
+     * 
+     * @return EXIT_SUCCESS if the environment variables were loaded successfully,
+     *         EXIT_FAILURE if an error occurred (file not found, parsing error, or setenv failure)
+     *
+     * @note The maximum line length that can be processed is defined by LINE_BUF_SIZE.
+     *       Lines exceeding this length or missing an '=' character will cause an error.
+     */
     char line_buf[LINE_BUF_SIZE];
     FILE *file_ptr = fopen(file_path, "r");
     if (file_ptr == NULL) {
@@ -126,7 +170,7 @@ int request_weather_data(
     char *location_key,
     char *api_key
 ) {
-    char *full_url = create_request_url(location_key, api_key);
+    char *full_url = create_request_url(location_key, api_key, FIVE_DAYS);
     curl_easy_setopt(handle, CURLOPT_URL, full_url);
     curl_easy_setopt(handle, CURLOPT_ERRORBUFFER, curl_err_buf);
     CURLcode status = curl_easy_perform(handle);
