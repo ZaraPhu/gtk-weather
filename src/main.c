@@ -13,6 +13,7 @@ Creation Date: May 14, 2025.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <pthread.h>
 
 /*** Macro Definitions ***/
 #define CSS_FILE "style.css"
@@ -41,6 +42,10 @@ static void on_activate(GtkApplication *app, gpointer user_data) {
         gtk_widget_add_css_class(label, "title-xlarge");
     }
 
+    GtkWidget *btn = gtk_button_new();
+    gtk_button_set_label(GTK_BUTTON(btn), "Press Me!");
+    g_signal_connect(btn, "clicked", G_CALLBACK(request_weather_data), NULL);
+    
     GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
     gtk_box_append(GTK_BOX(box), label);
     gtk_window_set_child(GTK_WINDOW(window), box);

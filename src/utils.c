@@ -7,7 +7,6 @@ Creation Date: May 14, 2025.
 
 /*** Dependencies ***/
 #include "utils.h"
-#include <curl/easy.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,13 +17,14 @@ Creation Date: May 14, 2025.
 
 /*** Macro Definitions ***/
 #define LINE_BUF_SIZE 256
-#define RESPONSE_BUF_SIZE 1024
+#define RESPONSE_BUF_SIZE 1048576
 #define URL_BUF_SIZE 1024
 #define STR_LEN_MAX 512
 
 /*** Global Variables/Constants ***/
 static char *ACCUWEATHER_FORECAST_API = "http://dataservice.accuweather.com/forecasts/v1";
-static char *curl_err_buf[CURL_ERROR_SIZE];
+static char curl_err_buf[CURL_ERROR_SIZE];
+static char curl_response[RESPONSE_BUF_SIZE];
 
 /*** Enums/Structs Definition ***/
 enum ForecastFrequency {
@@ -40,6 +40,10 @@ enum ForecastFrequency {
 };
 
 /*** Static Functions ***/
+static void parse_json(char *json_buffer) {
+    
+}
+
 static void my_concat(char *base, const char *add) {
     /**
      * Concatenates a string to the end of another string.
@@ -157,12 +161,14 @@ void load_css(char* css_file_path) {
 }
 
 size_t write_data(
-    char *buffer,
-    size_t len,
+    char *recv_buffer,
+    size_t size,
     size_t nmemb,
     void *user_data
 ) {
-    return 1;
+    my_concat(curl_response, recv_buffer);
+    fprintf(stdout, "Received:\n%s\n", recv_buffer);
+    return size * nmemb;
 }
 
 int request_weather_data(
@@ -173,6 +179,7 @@ int request_weather_data(
     char *full_url = create_request_url(location_key, api_key, FIVE_DAYS);
     curl_easy_setopt(handle, CURLOPT_URL, full_url);
     curl_easy_setopt(handle, CURLOPT_ERRORBUFFER, curl_err_buf);
+    curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, write_data);
     CURLcode status = curl_easy_perform(handle);
     free(full_url);
     if (status) { fprintf(stderr, "libcurl: %s\n", curl_easy_strerror(status)); return EXIT_FAILURE; }
