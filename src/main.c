@@ -22,9 +22,13 @@ Creation Date: May 14, 2025.
 #define DIAGONAL sqrt(pow(WINDOW_HEIGHT, 2) + pow(WINDOW_HEIGHT, 2))
 
 /*** Global Variables/Constants ***/
-int status;
+char* accuweather_api_key;
 
 /*** Static Functions ***/
+static void on_weather_request_press(GtkButton button, gpointer data) {
+    request_weather_data("49538", accuweather_api_key);
+}
+
 static void on_activate(GtkApplication *app, gpointer user_data) {
     GtkWidget *window = gtk_application_window_new(app);
     gtk_window_set_title(GTK_WINDOW(window), "GTK Weather");
@@ -44,30 +48,31 @@ static void on_activate(GtkApplication *app, gpointer user_data) {
 
     GtkWidget *btn = gtk_button_new();
     gtk_button_set_label(GTK_BUTTON(btn), "Press Me!");
-    g_signal_connect(btn, "clicked", G_CALLBACK(request_weather_data), NULL);
+    // this next line will cause a memory leak, need a better solution
+    g_signal_connect_swapped(btn, "clicked", G_CALLBACK(on_weather_request_press), NULL);
     
     GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
     gtk_box_append(GTK_BOX(box), label);
+    gtk_box_append(GTK_BOX(box), btn);
     gtk_window_set_child(GTK_WINDOW(window), box);
     gtk_window_present(GTK_WINDOW(window));
 }
 
 /*** Main Function ***/
 int main(int argc, char **args) {
-    if (load_dotenv("../.env") == EXIT_FAILURE) { return EXIT_FAILURE; }
-    char *accuweather_api_key = getenv("ACCUWEATHER_API_KEY");
-    if (accuweather_api_key == NULL) { fprintf(stderr, "Could not load AccuWeather API key"); }
-
-    CURL *curl_handle = curl_easy_init();
-    status = request_weather_data(curl_handle, "49538", accuweather_api_key);
+    if (load_dotenv("../.env") == EXIT_FAILURE) 
+        { fprintf(stderr, "Could not load environment file. Terminating program.\n"); return EXIT_FAILURE; }
+    accuweather_api_key = getenv("ACCUWEATHER_API_KEY");
+    if (accuweather_api_key == NULL) 
+        { fprintf(stderr, "Could not load AccuWeather API key. Terminating program.\n"); return EXIT_FAILURE; }
 
     GtkApplication *app = gtk_application_new("com.example.gtk-weather", G_APPLICATION_DEFAULT_FLAGS);
-    if (app == NULL) { fprintf(stderr, "Could not start Gtk application.\n"); return EXIT_FAILURE; }
+    if (app == NULL) 
+        { fprintf(stderr, "Could not start Gtk application. Terminating Program.\n"); return EXIT_FAILURE; }
     g_signal_connect_swapped(app, "startup", G_CALLBACK(load_css), CSS_FILE);
     g_signal_connect(app, "activate", G_CALLBACK(on_activate), NULL);
-    status = g_application_run(G_APPLICATION(app), argc, args);
+    int status = g_application_run(G_APPLICATION(app), argc, args);
 
     g_object_unref(app);
-    curl_easy_cleanup(curl_handle);
     return status;
 }
